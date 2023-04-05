@@ -1,20 +1,43 @@
 import React from 'react'
 import styled from 'styled-components'
 import { auth, provider } from '../firebase';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { selectUserName, selectUserPhoto, setUserLoginDetailes } from '../app/features/user/userSlice';
 
 const Header = (props) => {
+    const dispatch = useDispatch();
+    const history = useNavigate();
+    const userName = useSelector(selectUserName);
+    const userPhoto = useSelector(selectUserPhoto);
+
     const handleAuth = () =>{
         auth.signInWithPopup(provider).then((result) => {
-            console.log(result)
+            setUser(result.user)
         }).catch((error)=>{
             alert(error.message);
         });
      }
+    const setUser = (user) =>{
+        dispatch(
+            setUserLoginDetailes({
+                name: user.displayName,
+                email: user.email,
+                photo: user.photoURL,
+            })
+        )
+    } 
+
     return (
         <Nav>
             <Logo>
                 <img src='/Images/logo.svg' alt='Disney+' />
             </Logo>
+
+            {
+                !userName? <Login onClick={handleAuth}>Login</Login>: <>
+               
+            
             <NavMenu>
                 <a href='/Home'>
                     <img src='/Images/home-icon.svg' alt='HOME' />
@@ -41,7 +64,9 @@ const Header = (props) => {
                     <span>SERIES</span>
                 </a>
             </NavMenu>
-            <Login onClick={handleAuth}>Login</Login>
+            <UserImg src={userPhoto} />
+            </>
+            }
         </Nav>
     )
 };
@@ -148,6 +173,10 @@ span{
     color: #000; 
     border-color: transparent;
   }
+ `;
+
+ const UserImg = styled.img`
+ 
  `
 
 export default Header
